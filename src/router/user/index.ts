@@ -33,16 +33,16 @@ const userRoutes: Array<RouteRecordRaw> = [
         path: "/books",
         component: Book,
         meta: {
-          title: "图书展示",
+          title: "课程展示",
         },
       },
-      {
-        path: "/orders",
-        component: Order,
-        meta: {
-          title: "我的订单",
-        },
-      },
+      // {
+      //   path: "/orders",
+      //   component: Order,
+      //   meta: {
+      //     title: "我的订单",
+      //   },
+      // },
     ],
   },
 ];

@@ -1,4 +1,5 @@
 <template>
+  <div class="appHeader" :style="{ backgroundColor: headertype }">
     <div class="bookNav">
       <div class="storeName">智慧星球</div>
       <ul>
@@ -9,47 +10,66 @@
           <router-link to="/books">课程展示</router-link>
         </li>
         <li :class="{ active: clickNav === 3 }" @click="clickNav = 3">
-          <router-link to="/orders">我的订单</router-link>
-        </li>
-        <li :class="{ active: clickNav === 4 }" @click="clickNav = 4">
           <router-link to="/manage/users">进入后台</router-link>
         </li>
-        <li :class="{ active: clickNav === 5 }" @click="clickNav = 5">
+        <li :class="{ active: clickNav === 4 }" @click="clickNav = 4">
           <router-link v-if="loginState == false" to="/login">登录</router-link>
           <span v-if="loginState == true">游客</span>
         </li>
       </ul>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 const loginState = ref(false);
 const clickNav = ref(1);
+let headertype = ref("transparent");
+onMounted(() => {
+  document.addEventListener("scroll", handlerscroll);
+  //绑定事件
+});
+onUnmounted(() => {
+  //卸载解绑
+  document.removeEventListener("scroll", handlerscroll);
+});
+//切换演示
+function handlerscroll() {
+  let scrolly = window.scrollY;
+  if (scrolly >= 100) {
+    headertype.value = "rgba(36, 35, 35, 0.22)";
+  } else {
+    headertype.value = "transparent";
+  }
+}
 </script>
 
 <style lang="scss" scoped>
-.bookNav {
+.appHeader{
   position: fixed;
+  z-index: 2;
+  width: 100%;
+  border-bottom: 1px solid #ffffff59;
+}
+.bookNav {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
-  width: 80%;
-  left: 7%;
   justify-content: space-between;
   padding: 30px 20px;
-  z-index: 2;
-  border-bottom: 1px solid #ffffff59;
   .storeName {
     color: white;
-    font-size: 20px;
+    font-size: 30px;
     font-weight: bold;
   }
   ul {
     display: flex;
-    font-family: "PingFang SC";
+    height: 40px;
     li {
+      line-height: 40px;
       width: 90px;
       margin-left: 7px;
-      padding: 6px 0px;
       text-align: center;
       cursor: pointer;
       transition: all 0.8s;
