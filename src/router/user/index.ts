@@ -1,10 +1,10 @@
 import { type RouteRecordRaw } from "vue-router";
 //引入模块文件
-import Book from "@/views/user/books.vue";
+import Course from "@/views/user/course.vue";
 import Login from "@/views/login.vue";
 import Index from "@/views/user/index.vue";
 import Home from "@/views/user/home.vue";
-import Order from "@/views/user/order.vue";
+import Single from "@/views/user/single.vue";
 //写路由
 const userRoutes: Array<RouteRecordRaw> = [
   {
@@ -23,26 +23,26 @@ const userRoutes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: "/home",
+        path: "home",
         component: Home,
         meta: {
           title: "首页",
         },
       },
       {
-        path: "/books",
-        component: Book,
+        path: "course",
+        component: Course,
         meta: {
           title: "课程展示",
         },
       },
-      // {
-      //   path: "/orders",
-      //   component: Order,
-      //   meta: {
-      //     title: "我的订单",
-      //   },
-      // },
+      {
+        path: "single",
+        component: Single,
+        meta: {
+          title: "课程详情",
+        },
+      },
     ],
   },
 ];

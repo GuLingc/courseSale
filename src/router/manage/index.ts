@@ -1,8 +1,8 @@
 import { type RouteRecordRaw } from "vue-router";
 //引入模块文件
-import manageWriters from "@/views/manage/writers.vue";
+import manageScholars from "@/views/manage/scholar.vue";
 import manageUsers from "@/views/manage/users.vue";
-import manageOrders from "@/views/manage/orders.vue";
+import manageLessons from "@/views/manage/lesson.vue";
 import Manage from "@/views/manage/index.vue";
 //写路由
 const manageRoutes: Array<RouteRecordRaw> = [
@@ -15,10 +15,10 @@ const manageRoutes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: "writers",
-        component: manageWriters,
+        path: "scholars",
+        component: manageScholars,
         meta: {
-          title: "作者管理",
+          title: "讲师管理",
         },
       },
       {
@@ -29,10 +29,10 @@ const manageRoutes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: "/manage/orders",
-        component: manageOrders,
+        path: "lessons",
+        component: manageLessons,
         meta: {
-          title: "订单管理",
+          title: "课程管理",
         },
       },
     ],

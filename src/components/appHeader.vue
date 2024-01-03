@@ -7,7 +7,7 @@
           <router-link to="/home">首页</router-link>
         </li>
         <li :class="{ active: clickNav === 2 }" @click="clickNav = 2">
-          <router-link to="/books">课程展示</router-link>
+          <router-link to="/course">课程展示</router-link>
         </li>
         <li :class="{ active: clickNav === 3 }" @click="clickNav = 3">
           <router-link to="/manage/users">进入后台</router-link>
