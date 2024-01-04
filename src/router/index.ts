@@ -13,16 +13,19 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  document.title = to.meta.title as string;
   if (to.meta.title === "登录") {
-    document.title = to.meta.title as string;
     document.body.style.overflow = "hidden"
     document.body.style.backgroundImage = "url('https://lmy-1311156074.cos.ap-nanjing.myqcloud.com/post/20240102110513_a48774c6f5334bd6a04cd954f6c8b1eb.jpg')";
-    next();
   } else {
-    document.title = to.meta.title as string;
     document.body.style.backgroundImage = "url()";
-    next();
   }
+  if (to.path.includes('/manage')) {
+    document.body.style.backgroundColor = 'white';
+  } else {
+    document.body.style.backgroundColor = 'rgb(22, 21, 39)';
+  }
+  next();
 });
 
 router.afterEach((to) => {

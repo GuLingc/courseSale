@@ -78,6 +78,7 @@ import HotTeacher from "@/components/hotTeacher.vue";
 .main {
   max-width: 1200px;
   margin: 0 auto;
+  font-family: emoji;
 }
 .lecturer {
   display: flex;
