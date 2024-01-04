@@ -12,22 +12,28 @@
             <template #title>后台管理系统</template>
           </el-menu-item>
           <el-menu-item index="/manage/users">
-            <router-link to="/manage/users" class="router-link">
-              <el-icon><User /></el-icon>
-              <span slot="title">人员管理</span>
-            </router-link>
+            <el-icon><User /></el-icon>
+            <template #title
+              ><router-link to="/manage/users" class="router-link">
+                人员管理
+              </router-link></template
+            >
           </el-menu-item>
           <el-menu-item index="/manage/lessons">
-            <router-link to="/manage/lessons">
-              <el-icon><document /></el-icon>
-              <span slot="title">课程管理</span>
-            </router-link>
+            <el-icon><document /></el-icon>
+            <template #title
+              ><router-link to="/manage/lessons"
+                >课程管理</router-link
+              ></template
+            >
           </el-menu-item>
           <el-menu-item index="/manage/scholars">
-            <router-link to="/manage/scholars">
             <el-icon><Filter /></el-icon>
-            <span slot="title">讲师管理</span>
-            </router-link>
+            <template #title
+              ><router-link to="/manage/scholars"
+                >讲师管理</router-link
+              ></template
+            >
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -88,7 +94,7 @@ const handleFold = () => {
 //侧边导航
 .el-aside {
   width: max-content;
-  height: 100vh;
+  min-height: 100vh;
   background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
   .el-menu-vertical-demo:not(.el-menu--collapse) {
     width: 240px;
