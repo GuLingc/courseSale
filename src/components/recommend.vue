@@ -1,19 +1,20 @@
 <template>
   <div class="recommend">
     <div
-      v-for="(item, index) in courseDatas"
+      v-for="(item, index) in courseData"
       :key="index"
       class="recommend-item"
     >
       <el-card
+        v-if="item.length != 0"
         :body-style="{ padding: '0px' }"
         v-for="(course, o) in item"
         :key="o"
       >
-        <img :src="course.photo" class="image" />
+        <img :src="course.coursePicture" class="image" />
         <div style="padding: 14px">
-          <span>{{ course.title }}</span>
-          <p>{{ course.level }}</p>
+          <span>{{ course.lecturerName }}</span>
+          <p>{{ course.courseTitle }}</p>
         </div>
       </el-card>
     </div>
@@ -21,56 +22,25 @@
 </template>
 
 <script setup lang="ts">
-const courseDatas = [
-  [
-    {
-      id: 1,
-      title: "Mathematics",
-      level: "我是一个课程名字1111111111",
-      photo:
-        "https://img2.baidu.com/it/u=270029723,3225860608&fm=253&fmt=auto&app=138&f=JPEG?w=656&h=500",
-    },
-    {
-      id: 2,
-      title: "Physics",
-      level: "Advanced",
-      photo:
-        "https://img2.baidu.com/it/u=3653114115,3722914227&fm=253&fmt=auto&app=120&f=JPEG?w=396&h=500",
-    },
-  ],
-  [
-    {
-      id: 3,
-      title: "Biology",
-      level: "Beginner",
-      photo:
-        "https://img1.baidu.com/it/u=4153583684,635587465&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889",
-    },
-    {
-      id: 4,
-      title: "Chemistry",
-      level: "Intermediate",
-      photo:
-        "https://img0.baidu.com/it/u=2848184596,3588162484&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=750",
-    },
-  ],
-  [
-    {
-      id: 5,
-      title: "History",
-      level: "Advanced",
-      photo:
-        "https://img2.baidu.com/it/u=3653114115,3722914227&fm=253&fmt=auto&app=120&f=JPEG?w=396&h=500",
-    },
-    {
-      id: 6,
-      title: "Literature",
-      level: "Intermediate",
-      photo:
-        "https://img0.baidu.com/it/u=3832526735,1654676040&fm=253&fmt=auto&app=138&f=JPEG?w=346&h=499",
-    },
-  ],
-];
+import { viewByType } from "@/api/user";
+import { onMounted, ref } from "vue";
+let courseData = ref<any[]>([[], [], []]);
+onMounted(() => {
+  gainHot();
+});
+const gainHot = () => {
+  let data = {
+    choice: 1,
+  };
+  viewByType(data).then((res) => {
+    let k = Math.ceil(res.data.length / 3);
+    let datas = res.data;
+    console.log(datas);
+    courseData.value[0] = datas.slice(0, k);
+    courseData.value[1] = datas.slice(k, k * 2);
+    courseData.value[2] = datas.slice(k * 2);
+  });
+};
 </script>
 
 <style lang="scss" scoped>

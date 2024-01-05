@@ -13,8 +13,8 @@
           <router-link to="/manage/users">进入后台</router-link>
         </li>
         <li :class="{ active: clickNav === 4 }" @click="clickNav = 4">
-          <router-link v-if="loginState == false" to="/login">登录</router-link>
-          <span v-if="loginState == true">游客</span>
+          <span v-if="userId != 0">退出登录</span>
+          <router-link v-else to="/login">登录</router-link>
         </li>
       </ul>
     </div>
@@ -23,9 +23,9 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
-const loginState = ref(false);
 const clickNav = ref(1);
 let headertype = ref("transparent");
+let userId = window.localStorage.userId
 onMounted(() => {
   document.addEventListener("scroll", handlerscroll);
   //绑定事件

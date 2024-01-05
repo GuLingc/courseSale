@@ -7,46 +7,36 @@
       @mouseleave="handleMouse(o)"
       @mouseenter="handleMouse(o)"
     >
-      <img :src="course.photo" class="image" />
+      <img :src="course.coursePicture" class="image" />
       <div style="padding: 14px" class="cardBottom">
-        <span>{{ course.title }}</span>
-        <p v-show="course.introShow">{{ course.level }}</p>
+        <span>{{ course.lecturerName }}</span>
+        <p v-show="course.introShow">{{ course.courseTitle }}</p>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
-const courseDatas = reactive([
-  {
-    id: 1,
-    title: "Mathematics",
-    level: "我是一个课程名字1111111111",
-    photo:
-      "https://img2.baidu.com/it/u=270029723,3225860608&fm=253&fmt=auto&app=138&f=JPEG?w=656&h=500",
-    introShow: false,
-  },
-  {
-    id: 2,
-    title: "Physics",
-    level: "Advanced",
-    photo:
-      "https://img2.baidu.com/it/u=3653114115,3722914227&fm=253&fmt=auto&app=120&f=JPEG?w=396&h=500",
-    introShow: false,
-  },
-  {
-    id: 3,
-    title: "Biology",
-    level: "Beginner",
-    photo:
-      "https://img1.baidu.com/it/u=4153583684,635587465&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889",
-    introShow: false,
-  },
-]);
-
+import { viewByType } from "@/api/user";
+import { ref, onMounted } from "vue";
+const courseDatas = ref<any[]>([]);
+onMounted(() => {
+  gainHot();
+});
+const gainHot = () => {
+  let data = {
+    choice: 0,
+  };
+  viewByType(data).then((res) => {
+    for (let i = 0; i < res.data.length; i++) {
+      let datas = res.data[i];
+      let introShow = false;
+      courseDatas.value.push({ ...datas, introShow });
+    }
+  });
+};
 function handleMouse(index: number) {
-  courseDatas[index].introShow = !courseDatas[index].introShow;
+  courseDatas.value[index].introShow = !courseDatas.value[index].introShow;
 }
 </script>
 

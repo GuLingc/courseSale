@@ -30,10 +30,70 @@ export const selectAll = async () =>
     method: "GET",
   });
 //删除类型
-export const deleteType = async (data:any) =>
-requests({
-  url: "/type/deleteType",
-  method: "DELETE",
-  params:data
-});
+export const deleteType = async (data: any) =>
+  requests({
+    url: "/type/deleteType",
+    method: "DELETE",
+    params: data,
+  });
+//查看一级类型下的二级类型
+export const selectByType = async (data: any) =>
+  requests({
+    url: "/type/selectByType",
+    method: "GET",
+    params: data,
+  });
 
+//添加老师
+export const insertLecturer = async (params: any, data: any) =>
+  requests({
+    url: "/lecturer/insertLecturer",
+    method: "POST",
+    params,
+    data,
+  });
+//分页搜索讲师
+export const selectLecturerByPage = async (data: any) =>
+  requests({
+    url: "/lecturer/selectLecturerByPage",
+    method: "GET",
+    params: data,
+  });
+
+//删除讲师
+export const deleteLecturer = async (data: any) =>
+  requests({
+    url: "/lecturer/deleteLecturer",
+    method: "DELETE",
+    params: data,
+  });
+
+//添加课程
+export const insertCourse = async (params: any, data: any) =>
+  requests({
+    url: "/course/insertCourse",
+    method: "POST",
+    params,
+    data,
+  });
+//添加课程类型
+export const insertCourseType = async (data: any) =>
+  requests({
+    url: "/type/insertCourseType",
+    method: "POST",
+    params: data,
+  });
+//分页搜索课程
+export const viewByPage = async (data: any) =>
+  requests({
+    url: "/course/viewByPage",
+    method: "GET",
+    params: data,
+  });
+//删除课程
+export const deleteCourse= async (data: any) =>
+  requests({
+    url: "/course/deleteCourse",
+    method: "DELETE",
+    params: data,
+  });

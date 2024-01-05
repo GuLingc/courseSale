@@ -6,18 +6,12 @@
         <div class="detail">
           <div class="aboutUs"></div>
           <div class="title"><h2>金牌讲师</h2></div>
+          <p style="text-indent: 0em;font-size: 18px;">{{ firstTeacher.lecturerName }}</p>
           <p>
-            中国网通海尔集团 中石油 中外运 顶津食品 黑龙江省测绘局 辽宁省委党校
-            黑龙江省委党校 平安 国美集团 龙煤集团 中国建设银行
-            哈尔滨空中交通管理局 中国农业银行 黑龙江邮政储汇 沈阳606研究所
-            哈尔滨703研究所 中国社会科学院应化所 远大购物中心
-            农垦总医院长春国商集团惠普方太厨具 中国劲酒 KFC 招商银行 中保财险
-            哈工大 华林佳通 蓝星石化 南方航空 中国联通 中国电信 中邮普泰
-            华为集团 哈兽研 用友软件 哈药集团 贵州益佰医药集团 海洋王照明
-            嵩山食品 神州数码
+            {{ firstTeacher.lecturerIntroduction }}
           </p>
         </div>
-        <div class="lecturerHeader"></div>
+        <div class="lecturerHeader"  :style="{ backgroundImage: `url(${firstTeacher.lecturerPicture || 'https://26823097.s61i.faiusr.com/2/AD0IuZPlDBACGAAg26rrggYoo7eSzwEwgA84zAg.jpg'})` }"></div>
       </div>
       <div class="courseTeacher">
         <div
@@ -66,6 +60,20 @@
 import Recommend from "@/components/recommend.vue";
 import NewCourse from "@/components/newCourse.vue";
 import HotTeacher from "@/components/hotTeacher.vue";
+import { hostLecturer } from "@/api/user";
+import { onMounted, ref } from "vue";
+let firstTeacher = ref<any>({})
+let teachers = ref<any[]>([])
+onMounted(() => {
+  hotTeacher();
+});
+const hotTeacher = () => {
+  hostLecturer().then((res: any) => {
+    console.log("金牌讲师", res);
+    firstTeacher.value = res.data[0]
+    teachers.value = res.data
+  });
+};
 </script>
 
 <style lang="scss" scoped>

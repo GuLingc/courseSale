@@ -7,22 +7,24 @@
         placeholder="请输入检索条件"
         :prefix-icon="Search"
       />
-      <el-button type="primary">搜索</el-button>
+      <el-button type="primary" @click="selectUser(1, 10,userCondation)">搜索</el-button>
       <el-button type="success" @click="selectUser(1, 10)">重置</el-button>
     </div>
     <el-table
       :data="tableData"
       style="width: 100%; margin-top: 50px; font-size: 16px"
     >
-      <el-table-column prop="registerTime" label="注册时间" />
-      <el-table-column prop="account" label="账户" />
-      <el-table-column prop="username" label="昵称" />
-      <el-table-column prop="sex" label="性别" />
-      <el-table-column prop="email" label="邮箱" />
+      <el-table-column prop="registerTime" label="注册时间" align="center" />
+      <el-table-column prop="account" label="账户" align="center" />
+      <el-table-column prop="username" label="昵称" align="center" />
+      <el-table-column prop="sex" label="性别" align="center" />
+      <el-table-column prop="email" label="邮箱" align="center" />
       <el-table-column label="操作">
         <template #default="scope">
           <el-button @click="handleEdit(scope.row)">查看</el-button>
-          <el-button @click="handleShut(scope.row)" type="danger">删除</el-button>
+          <el-button @click="handleShut(scope.row)" type="danger"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -118,7 +120,6 @@ function selectUser(aidPage: number, aidSize: number, selectContent?: string) {
   };
   selectUsers(data)
     .then((response) => {
-      console.log(response);
       currentPages.value = aidPage;
       pagesSize.value = aidSize;
       userCondation.value = selectContent || "";

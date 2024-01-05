@@ -3,11 +3,11 @@
     <ul>
       <li v-for="(item, index) in teacherDatas">
         <div class="headerPicture">
-          <img :src="item.lecturer_picture" />
+          <img :src="item.lecturerPicture" />
         </div>
         <div class="textTeacher">
-          <h3>{{ item.leturer_name }}</h3>
-          <p>{{ item.leturer_introduction }}</p>
+          <h3>{{ item.lecturerName }}</h3>
+          <p>{{ item.lecturerIntroduction }}</p>
         </div>
       </li>
     </ul>
@@ -15,38 +15,17 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
-const teacherDatas = reactive([
-  {
-    lecturer_id: 1,
-    leturer_name: "Mathematics",
-    leturer_introduction:
-      "我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111我是一个课程名字1111111111",
-    lecturer_picture:
-      "https://img2.baidu.com/it/u=270029723,3225860608&fm=253&fmt=auto&app=138&f=JPEG?w=656&h=500",
-  },
-  {
-    lecturer_id: 2,
-    leturer_name: "Physics",
-    leturer_introduction: "Advanced",
-    lecturer_picture:
-      "https://img2.baidu.com/it/u=3653114115,3722914227&fm=253&fmt=auto&app=120&f=JPEG?w=396&h=500",
-  },
-  {
-    lecturer_id: 3,
-    leturer_name: "Biology",
-    leturer_introduction: "Beginner",
-    lecturer_picture:
-      "https://img1.baidu.com/it/u=4153583684,635587465&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889",
-  },
-  {
-    lecturer_id: 4,
-    leturer_name: "Mathematics",
-    leturer_introduction: "我是一个课程名字1111111111",
-    lecturer_picture:
-      "https://img2.baidu.com/it/u=270029723,3225860608&fm=253&fmt=auto&app=138&f=JPEG?w=656&h=500",
-  },
-]);
+import { hostLecturer } from "@/api/user";
+import { onMounted, ref } from "vue";
+let teacherDatas = ref<any[]>([])
+onMounted(() => {
+  hotTeacher();
+});
+const hotTeacher = () => {
+  hostLecturer().then((res: any) => {
+    teacherDatas.value = res.data
+  });
+};
 </script>
 
 <style lang="scss" scoped>

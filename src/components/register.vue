@@ -1,16 +1,16 @@
 <template>
   <ul>
     <li>
-      <p class="xtitle">图书管理</p>
+      <p class="xtitle">智慧星球</p>
       <p>伴你一路前行</p>
       <div>
-        <img src="@/assets/images/男主.jpeg" />
+        <img src="@/assets/images/女主.jpeg" />
       </div>
       <p class="news">欢迎登录</p>
       <div><button @click="changes(20,'login')">登录</button></div>
     </li>
     <li>
-      <p class="xtitle">图书管理</p>
+      <p class="xtitle">智慧星球</p>
       <p>伴你一路前行</p>
       <div>
         <img src="@/assets/images/男主.jpeg" />

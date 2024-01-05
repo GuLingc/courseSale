@@ -23,52 +23,251 @@
                 : "注册"
             }}
           </p>
-          <el-form label-width="80px" class="demo-ruleForm" status-icon>
-            <el-form-item label="账户" v-show="!emailShow">
-              <el-input placeholder="请输入账户" />
+          <el-form
+            ref="ruleFormRef"
+            :model="userinfo"
+            :rules="rules"
+            label-width="80px"
+            class="demo-ruleForm"
+            status-icon
+          >
+            <el-form-item label="账户" v-if="!emailShow" prop="account">
+              <el-input placeholder="请输入账户" v-model="userinfo.account" />
             </el-form-item>
-            <el-form-item label="密码" v-show="!emailShow">
-              <el-input placeholder="请输入密码" />
+            <el-form-item label="密码" v-if="!emailShow" prop="password">
+              <el-input placeholder="请输入密码" v-model="userinfo.password" />
             </el-form-item>
-            <el-form-item label="邮箱" v-show="loginShow == false || emailShow">
-              <el-input placeholder="请输入邮箱号" />
+            <el-form-item
+              label="邮箱"
+              v-if="loginShow == false || emailShow"
+              prop="email"
+            >
+              <el-input placeholder="请输入邮箱号" v-model="userinfo.email" />
             </el-form-item>
             <el-form-item
               label="验证码"
-              v-show="loginShow == false || emailShow"
+              v-if="loginShow == false || emailShow"
+              prop="code"
             >
-              <el-input placeholder="请输入验证码" />
+              <el-input placeholder="请输入验证码" v-model="userinfo.code" />
             </el-form-item>
             <el-form-item>
-              <el-button v-show="loginShow == false || emailShow"
-                >发送验证码</el-button
+              <el-button
+                :disabled="sendSuccess"
+                v-show="loginShow == false || emailShow"
+                @click="sendCode"
+                >{{
+                  sendSuccess ? sendNum + "s后重新发送" : "发送验证码"
+                }}</el-button
               >
-              <el-button>登录</el-button>
+              <el-button @click="submitForm(ruleFormRef)">
+                {{ loginShow == true ? "登录" : "注册" }}</el-button
+              >
             </el-form-item>
           </el-form>
           <p class="reset" v-show="loginShow">
             <span @click="emailShow = !emailShow">{{
               emailShow == true ? "密码登录" : "邮箱登录"
             }}</span
-            >|<span>忘记密码</span>
+            >|<span @click="seedialogVisible = true">忘记密码</span>
           </p>
         </div>
       </div>
     </div>
+    <el-dialog title="忘记密码" v-model="seedialogVisible" width="30%">
+      <el-form ref="userInfos" :model="userinfo" label-width="80px">
+        <el-form-item label="邮箱">
+          <el-input v-model="userinfo.email"></el-input>
+        </el-form-item>
+        <el-form-item label="验证码">
+          <el-input v-model="userinfo.code"> </el-input>
+        </el-form-item>
+        <el-form-item label="新密码">
+          <el-input type="password" v-model="userinfo.newpassword"></el-input>
+        </el-form-item>
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+        style="display: flex; justify-content: center"
+      >
+        <el-button
+          type="success"
+          :disabled="sendSuccess"
+          @click="sendCode"
+          >{{ sendSuccess ? sendNum + "s后重新发送" : "发送验证码" }}</el-button
+        >
+        <el-button type="primary">重置</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
 import Register from "@/components/register.vue";
+import { sendEmail, userRegister, accountLogin, emailLogin } from "@/api/user";
+import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+const router = useRouter();
 let lefts = ref(20);
+interface infoType {
+  account: string;
+  password: string;
+  email: string;
+  code: string;
+  newpassword: string;
+}
+const ruleFormRef = ref<FormInstance>();
+let userinfo = ref<infoType>({
+  account: "",
+  password: "",
+  email: "",
+  code: "",
+  newpassword: "",
+});
+let sendNum = ref(60);
+let sendSuccess = ref(false);
 let loginShow = ref(true);
 let emailShow = ref(false);
-//注册或登录
+let seedialogVisible = ref(false);
+const rules = reactive<FormRules<infoType>>({
+  account: [
+    { required: true, message: "请输入账户", trigger: "blur" },
+    {
+      pattern: /^[A-Za-z0-9]{6,8}$/,
+      message: "账户必须由6-8位的字母或数字组成",
+      trigger: "blur",
+    },
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    {
+      pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,10}$/,
+      message: "密码必须由6-10位的字母和数字组成，且至少包含一个字母和一个数字",
+      trigger: "blur",
+    },
+  ],
+  email: [{ required: true, message: "请输入邮箱", trigger: "blur" }, {}],
+  code: [{ required: true, message: "请输入验证码", trigger: "blur" }, {}],
+});
+//注册或登录状态切换
 function updates(newLefts: number, newLogin: boolean) {
   lefts.value = newLefts;
   loginShow.value = newLogin;
 }
+//发送验证码
+const sendCode = () => {
+  let types = loginShow.value ? "login" : "register";
+  const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
+  if (regEmail.test(userinfo.value.email)) {
+    let data = {
+      email: userinfo.value.email,
+      operate: types,
+    };
+    sendEmail(data)
+      .then((res: any) => {
+        if (res.data == 20000) {
+          ElMessage.success("已发送验证码");
+        }
+        sendSuccess.value = true;
+        sendNum.value = 60;
+        const timer = setInterval(() => {
+          sendNum.value = sendNum.value - 1;
+          if (sendNum.value == 0) {
+            sendSuccess.value = false;
+            clearInterval(timer);
+          }
+        }, 1000);
+      })
+      .catch((error) => {
+        ElMessage.error("发送验证码失败");
+      });
+  } else {
+    ElMessage.warning("请输入正确的邮箱号");
+  }
+};
+//用户注册/登录
+const submitForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      let loginu = loginShow.value ? true : false;
+      if (loginu) {
+        if (emailShow.value) {
+          console.log("邮箱登录");
+          let data = {
+            code: userinfo.value.code,
+            email: userinfo.value.email,
+          };
+          emailLogin(data)
+            .then((res: any) => {
+              if (res.code == 20000) {
+                ElMessage.success("登录成功");
+                userinfo.value.account = "";
+                userinfo.value.password = "";
+                window.localStorage.setItem("userId", res.data.userId);
+                window.localStorage.setItem("authority", res.data.authority);
+                router.push("/home");
+              } else {
+                ElMessage.error("登录失败");
+              }
+            })
+            .catch((error) => {
+              ElMessage.error("登录失败");
+            });
+        } else {
+          console.log("密码登录");
+          let data = {
+            account: userinfo.value.account,
+            password: userinfo.value.password,
+          };
+          accountLogin(data)
+            .then((res: any) => {
+              if (res.code == 20000) {
+                ElMessage.success("登录成功");
+                userinfo.value.account = "";
+                userinfo.value.password = "";
+                window.localStorage.setItem("userId", res.data.userId);
+                window.localStorage.setItem("authority", res.data.authority);
+                router.push("/home");
+              } else {
+                ElMessage.error("登录失败");
+              }
+            })
+            .catch((error) => {
+              ElMessage.error("登录失败");
+            });
+        }
+      } else {
+        let data = {
+          account: userinfo.value.account,
+          code: userinfo.value.code,
+          email: userinfo.value.email,
+          password: userinfo.value.password,
+        };
+        userRegister(data)
+          .then((res: any) => {
+            if (res.code == 20000) {
+              ElMessage.success("注册成功");
+              userinfo.value.account = "";
+              userinfo.value.code = "";
+              userinfo.value.email = "";
+              userinfo.value.password = "";
+              sendSuccess.value = false;
+            } else {
+              ElMessage.error(res.message);
+            }
+          })
+          .catch((error) => {
+            ElMessage.error("注册失败");
+          });
+      }
+    } else {
+      ElMessage.warning("请完善信息");
+    }
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -138,6 +337,9 @@ function updates(newLefts: number, newLogin: boolean) {
       .el-button {
         font-size: 18px;
         margin: 10px 0;
+      }
+      :deep(.el-input__inner) {
+        color: white;
       }
     }
     .reset {

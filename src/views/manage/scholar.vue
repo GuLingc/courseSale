@@ -2,81 +2,282 @@
   <div class="scholars">
     <div class="condations">
       <el-input
-        v-model="userCondation"
+        v-model="lecturerCondation"
         class="w-50 m-2"
         placeholder="请输入检索条件"
         :prefix-icon="Search"
       />
-      <el-button type="primary">搜索</el-button>
-      <el-button type="success">重置</el-button>
+      <el-button
+        type="primary"
+        @click="selectLecturerAll(1, 10, lecturerCondation)"
+        >搜索</el-button
+      >
+      <el-button type="success" @click="selectLecturerAll(1, 10, '')"
+        >重置</el-button
+      >
+      <el-button type="warning" @click="addTeacher = true">添加</el-button>
     </div>
     <el-table :data="tableData" style="width: 100%; margin-top: 50px">
-      <el-table-column prop="date" label="注册时间" />
-      <el-table-column prop="name" label="账户" />
-      <el-table-column prop="state" label="昵称" />
-      <el-table-column prop="city" label="性别" />
-      <el-table-column prop="address" label="邮箱" />
-      <el-table-column label="操作">
+      <el-table-column type="index" label="序号" width="100px" align="center" />
+      <el-table-column prop="lecturerName" label="姓名" align="center" />
+      <el-table-column
+        prop="lecturerIntroduction"
+        label="简介"
+        align="center"
+      />
+      <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button size="small">编辑</el-button>
-          <el-button size="small" type="danger">删除</el-button>
+          <el-button @click="handleLookLecturer(scope.row)">编辑</el-button>
+          <el-button type="danger" @click="handleLecturer(scope.row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
     <el-pagination
-      v-model:current-page="currentPage"
-      v-model:page-size="pageSize"
+      v-model:current-page="currentPages"
+      v-model:page-size="pageSizes"
       :page-sizes="[5, 10, 15, 20]"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="400"
+      :total="totals"
+      @change="handleChange"
     />
+    <!-- 添加讲师 -->
+    <el-dialog
+      v-model="addTeacher"
+      title="添加讲师"
+      width="500px"
+      :before-close="shutAdd"
+    >
+      <el-form>
+        <el-form-item label="姓名" :label-width="formLabelWidth">
+          <el-input v-model="insertInfo.lecturerName" />
+        </el-form-item>
+        <el-form-item label="简介" :label-width="formLabelWidth">
+          <el-input v-model="insertInfo.lecturerIntroduction" type="textarea" />
+        </el-form-item>
+        <el-form-item label="照片" :label-width="formLabelWidth">
+          <el-upload
+            action="#"
+            list-type="picture-card"
+            :auto-upload="false"
+            :limit="1"
+            :on-exceed="exceedFun"
+            accept="image/*"
+            v-model:file-list="photos"
+          >
+            <el-icon><Plus /></el-icon>
+            <template #file="{ file }">
+              <div>
+                <img
+                  class="el-upload-list__item-thumbnail"
+                  :src="file.url"
+                  alt=""
+                />
+                <span class="el-upload-list__item-actions">
+                  <span
+                    v-if="!disabled"
+                    class="el-upload-list__item-delete"
+                    @click="handleRemove(file)"
+                  >
+                    <el-icon><Delete /></el-icon>
+                  </span>
+                </span>
+              </div>
+            </template>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="subminInfo">添加</el-button>
+          <el-button @click="shutAdd">取消</el-button>
+        </span>
+      </template>
+    </el-dialog>
+    <!-- 删除讲师 -->
+    <el-dialog v-model="deleteLectureModel" title="提示信息" width="400px">
+      <span>确定要删除这个讲师？</span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="shutSure">确定</el-button>
+          <el-button @click="deleteLectureModel = false"> 取消 </el-button>
+        </span>
+      </template>
+    </el-dialog>
+    <!--查看讲师 -->
+    <el-dialog v-model="lookLecturerModel" title="讲师信息" width="440px">
+      <el-form :model="lookInfo">
+        <el-form-item label="姓名" :label-width="formLabelWidth">
+          <el-input :value="lookInfo.lecturerName"/>
+        </el-form-item>
+        <el-form-item label="简介" :label-width="formLabelWidth">
+          <el-input
+            :value="lookInfo.lecturerIntroduction"
+            :autosize="{ minRows: 1, maxRows: 5 }"
+            type="textarea"
+          />
+        </el-form-item>
+        <el-form-item label="图片" :label-width="formLabelWidth">
+          <ul class="photos" v-if="lookInfo.lecturerPicture != null">
+            <li>
+              <img :src="lookInfo.lecturerPicture" />
+            </li>
+          </ul>
+          <div v-if="lookInfo.lecturerPicture == null">暂无图片</div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="lookLecturerModel = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Search } from "@element-plus/icons-vue";
-import { ref } from "vue";
-let userCondation = ref("");
-let currentPage = ref(1)
-let pageSize = ref(10)
-const tableData = [
-  {
-    date: "2016-05-03",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Home",
-  },
-  {
-    date: "2016-05-02",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Office",
-  },
-  {
-    date: "2016-05-04",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Home",
-  },
-  {
-    date: "2016-05-01",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Office",
-  },
-];
+import { onMounted, ref } from "vue";
+import { Search, Plus, Delete } from "@element-plus/icons-vue";
+import { ElMessage, type UploadFile, type UploadUserFile } from "element-plus";
+import {
+  insertLecturer,
+  selectLecturerByPage,
+  deleteLecturer,
+} from "@/api/manage";
+
+let lecturerCondation = ref("");
+let currentPages = ref(1);
+let pageSizes = ref(10);
+let totals = ref(0);
+let addTeacher = ref(false);
+const disabled = ref(false);
+let deleteLectureModel = ref(false);
+let lookLecturerModel = ref(false);
+let formLabelWidth = "80px";
+interface typeInfo {
+  lecturerId: number;
+  lecturerName: string;
+  lecturerIntroduction: string;
+  lecturerPicture: string;
+}
+let tableData = ref<Array<typeInfo>>([]);
+let lookInfo = ref<typeInfo>({
+  lecturerId: 0,
+  lecturerName: "",
+  lecturerIntroduction: "",
+  lecturerPicture: "",
+});
+let photos = ref<any[]>([]);
+let deleteLecturerId = ref(0);
+let insertInfo = ref({
+  lecturerIntroduction: "",
+  lecturerName: "",
+});
+onMounted(() => {
+  selectLecturerAll(1, 10, "");
+});
+//分页搜索讲师
+const selectLecturerAll = (
+  pageNo: number,
+  pageSize: number,
+  search: string
+) => {
+  let data = {
+    pageNo,
+    pageSize,
+    search,
+  };
+  selectLecturerByPage(data)
+    .then((res) => {
+      tableData.value = res.data.records;
+      totals.value = res.data.total;
+      lecturerCondation.value = search;
+      currentPages.value = pageNo;
+      pageSizes.value = pageSize;
+    })
+    .catch((error) => {
+      ElMessage.error("查询数据失败");
+    });
+};
+const handleChange = (current: number, size: number) => {
+  selectLecturerAll(current, size, lecturerCondation.value);
+};
+//查看讲师信息
+const handleLookLecturer = (row: any) => {
+  lookInfo.value = row;
+  lookLecturerModel.value = true;
+};
+//删除讲师弹窗
+const handleLecturer = (row: any) => {
+  deleteLecturerId.value = row.lecturerId;
+  deleteLectureModel.value = true;
+};
+//删除讲师
+const shutSure = () => {
+  let data = {
+    lecturerId: deleteLecturerId.value,
+  };
+  deleteLecturer(data)
+    .then((res: any) => {
+      if (res.code == 20000) {
+        let index = tableData.value.findIndex((item) => {
+          if (item.lecturerId == deleteLecturerId.value) {
+            return true;
+          }
+        });
+        tableData.value.splice(index, 1);
+        totals.value = totals.value - 1;
+        ElMessage.success("删除成功");
+      } else {
+        ElMessage.error("删除失败");
+      }
+    })
+    .catch((error) => {
+      ElMessage.error("删除失败");
+    });
+  deleteLectureModel.value = false;
+};
+//超出文件数量的钩子
+const exceedFun = (files: File[], uploadFiles: UploadUserFile[]) => {
+  ElMessage.warning("只允许上传一张照片");
+};
+//删除上传的头像
+const handleRemove = (file: UploadFile) => {
+  photos.value = [];
+};
+//添加讲师
+const subminInfo = () => {
+  let formdata = new FormData();
+  formdata.append("file", photos.value[0].raw);
+  let obj = {
+    lecturerIntroduction: insertInfo.value.lecturerIntroduction,
+    lecturerName: insertInfo.value.lecturerName,
+  };
+  insertLecturer(obj, formdata)
+    .then((res: any) => {
+      if (res.code == 20000) {
+        ElMessage.success("添加成功");
+      } else {
+        ElMessage.error("添加失败");
+      }
+      selectLecturerAll(1, 10, lecturerCondation.value);
+      addTeacher.value = false;
+      insertInfo.value.lecturerIntroduction = "";
+      insertInfo.value.lecturerName = "";
+      photos.value = [];
+    })
+    .catch((error) => {
+      ElMessage.error("添加失败");
+    });
+};
+//关闭添加弹窗
+const shutAdd = () => {
+  addTeacher.value = false;
+  insertInfo.value.lecturerIntroduction = "";
+  insertInfo.value.lecturerName = "";
+  photos.value = [];
+};
 </script>
 
 <style lang="scss" scoped>
@@ -92,6 +293,22 @@ const tableData = [
   }
   .demo-pagination-block .demonstration {
     margin-bottom: 16px;
+  }
+}
+.photos {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  li {
+    max-width: 320px;
+    max-height: 320px;
+    overflow: hidden;
+    img {
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+    }
   }
 }
 </style>
