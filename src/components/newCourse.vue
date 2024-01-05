@@ -32,6 +32,7 @@ const gainHot = () => {
       let datas = res.data[i];
       let introShow = false;
       courseDatas.value.push({ ...datas, introShow });
+      if(i == 2)return
     }
   });
 };

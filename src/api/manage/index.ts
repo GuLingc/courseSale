@@ -15,6 +15,12 @@ export const information = async (data: any) =>
     params: data,
   });
 //删除用户
+export const deleteUser = async (data: any) =>
+  requests({
+    url: "/user/delete",
+    method: "DELETE",
+    params: data,
+  });
 
 //插入类型
 export const insertType = async (data: any) =>
@@ -59,13 +65,20 @@ export const selectLecturerByPage = async (data: any) =>
     method: "GET",
     params: data,
   });
-
 //删除讲师
 export const deleteLecturer = async (data: any) =>
   requests({
     url: "/lecturer/deleteLecturer",
     method: "DELETE",
     params: data,
+  });
+//修改讲师信息
+export const updateLecturer = async (params: any, data: any) =>
+  requests({
+    url: "/lecturer/updateLecturer",
+    method: "PUT",
+    params,
+    data,
   });
 
 //添加课程
@@ -91,9 +104,16 @@ export const viewByPage = async (data: any) =>
     params: data,
   });
 //删除课程
-export const deleteCourse= async (data: any) =>
+export const deleteCourse = async (data: any) =>
   requests({
     url: "/course/deleteCourse",
     method: "DELETE",
     params: data,
+  });
+//修改课程信息
+export const updateCourse = async (data: any) =>
+  requests({
+    url: "/course/updateCourse",
+    method: "PUT",
+    params:data
   });

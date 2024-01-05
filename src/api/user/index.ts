@@ -31,17 +31,25 @@ export const userRegister = async (data: any) =>
     params: data,
   });
 
-  //金牌讲师
+//查看用户信息
+export const information = async (data: any) =>
+  requests({
+    url: "/user/information",
+    method: "GET",
+    params: data,
+  });
+
+//金牌讲师
 export const hostLecturer = async () =>
   requests({
     url: "/lecturer/hostLecturer",
     method: "GET",
   });
 
-  //热门课程
-  export const viewByType = async (data:any) =>
+//热门课程
+export const viewByType = async (data: any) =>
   requests({
     url: "/course/viewByType",
     method: "GET",
-    params:data
+    params: data,
   });

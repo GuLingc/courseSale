@@ -9,10 +9,10 @@
       />
       <el-button
         type="primary"
-        @click="selectLecturerAll(1, 10, lecturerCondation)"
+        @click="selectLecturerAll(1, 5, lecturerCondation)"
         >搜索</el-button
       >
-      <el-button type="success" @click="selectLecturerAll(1, 10, '')"
+      <el-button type="success" @click="selectLecturerAll(1, 5, '')"
         >重置</el-button
       >
       <el-button type="warning" @click="addTeacher = true">添加</el-button>
@@ -106,36 +106,71 @@
       </template>
     </el-dialog>
     <!--查看讲师 -->
-    <el-dialog v-model="lookLecturerModel" title="讲师信息" width="440px">
+    <el-dialog
+      v-model="lookLecturerModel"
+      title="讲师信息"
+      width="500px"
+      :before-close="shutLookNews"
+    >
       <el-form :model="lookInfo">
         <el-form-item label="姓名" :label-width="formLabelWidth">
-          <el-input :value="lookInfo.lecturerName"/>
+          <el-input v-model="lookInfo.lecturerName" />
         </el-form-item>
         <el-form-item label="简介" :label-width="formLabelWidth">
           <el-input
-            :value="lookInfo.lecturerIntroduction"
+            v-model="lookInfo.lecturerIntroduction"
             :autosize="{ minRows: 1, maxRows: 5 }"
             type="textarea"
           />
         </el-form-item>
-        <el-form-item label="图片" :label-width="formLabelWidth">
+        <el-form-item label="原头像" :label-width="formLabelWidth">
           <ul class="photos" v-if="lookInfo.lecturerPicture != null">
             <li>
               <img :src="lookInfo.lecturerPicture" />
             </li>
           </ul>
-          <div v-if="lookInfo.lecturerPicture == null">暂无图片</div>
+        </el-form-item>
+        <el-form-item label="新头像" :label-width="formLabelWidth">
+          <el-upload
+            action="#"
+            list-type="picture-card"
+            :auto-upload="false"
+            :limit="1"
+            :on-exceed="exceedFun"
+            accept="image/*"
+            v-model:file-list="newHeader"
+          >
+            <el-icon><Plus /></el-icon>
+            <template #file="{ file }">
+              <div>
+                <img
+                  class="el-upload-list__item-thumbnail"
+                  :src="file.url"
+                  alt=""
+                />
+                <span class="el-upload-list__item-actions">
+                  <span
+                    v-if="!disabled"
+                    class="el-upload-list__item-delete"
+                    @click="newsHeaderRemove(file)"
+                  >
+                    <el-icon><Delete /></el-icon>
+                  </span>
+                </span>
+              </div>
+            </template>
+          </el-upload>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="lookLecturerModel = false">关闭</el-button>
+          <el-button type="primary" @click="editInfo">修改</el-button>
+          <el-button @click="shutLookNews">关闭</el-button>
         </span>
       </template>
     </el-dialog>
   </div>
 </template>
-
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { Search, Plus, Delete } from "@element-plus/icons-vue";
@@ -144,12 +179,14 @@ import {
   insertLecturer,
   selectLecturerByPage,
   deleteLecturer,
+  updateLecturer,
 } from "@/api/manage";
 
 let lecturerCondation = ref("");
 let currentPages = ref(1);
-let pageSizes = ref(10);
+let pageSizes = ref(5);
 let totals = ref(0);
+let newHeader = ref<any[]>([]);
 let addTeacher = ref(false);
 const disabled = ref(false);
 let deleteLectureModel = ref(false);
@@ -175,7 +212,7 @@ let insertInfo = ref({
   lecturerName: "",
 });
 onMounted(() => {
-  selectLecturerAll(1, 10, "");
+  selectLecturerAll(1, 5, "");
 });
 //分页搜索讲师
 const selectLecturerAll = (
@@ -261,7 +298,7 @@ const subminInfo = () => {
       } else {
         ElMessage.error("添加失败");
       }
-      selectLecturerAll(1, 10, lecturerCondation.value);
+      selectLecturerAll(1, 5, lecturerCondation.value);
       addTeacher.value = false;
       insertInfo.value.lecturerIntroduction = "";
       insertInfo.value.lecturerName = "";
@@ -277,6 +314,53 @@ const shutAdd = () => {
   insertInfo.value.lecturerIntroduction = "";
   insertInfo.value.lecturerName = "";
   photos.value = [];
+};
+
+//修改讲师信息
+//删除新的上传头像
+//删除上传的头像
+const newsHeaderRemove = (file: UploadFile) => {
+  newHeader.value = [];
+};
+//修改讲师信息
+const editInfo = () => {
+  let formdata = new FormData();
+  let obj = {
+    lecturerId: lookInfo.value.lecturerId,
+    lecturerIntroduction: lookInfo.value.lecturerIntroduction,
+    lecturerName: lookInfo.value.lecturerName,
+  };
+  if(newHeader.value.length!=0) {
+    formdata.append("file", newHeader.value[0].raw);
+  }
+  updateLecturer(obj, formdata)
+    .then((res: any) => {
+      if (res.code == 20000) {
+        ElMessage.success("修改成功");
+        selectLecturerAll(
+          currentPages.value,
+          pageSizes.value,
+          lecturerCondation.value
+        );
+        lookLecturerModel.value = false;
+        newHeader.value = [];
+      } else {
+        ElMessage.error("修改失败");
+      }
+    })
+    .catch((error) => {
+      ElMessage.error("修改失败");
+    });
+};
+//关闭修改弹窗
+const shutLookNews = () => {
+  selectLecturerAll(
+    currentPages.value,
+    pageSizes.value,
+    lecturerCondation.value
+  );
+  lookLecturerModel.value = false;
+  newHeader.value = [];
 };
 </script>
 
@@ -294,6 +378,9 @@ const shutAdd = () => {
   .demo-pagination-block .demonstration {
     margin-bottom: 16px;
   }
+}
+:deep(.el-table td.el-table__cell div) {
+  white-space: nowrap;
 }
 .photos {
   list-style: none;

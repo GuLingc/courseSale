@@ -35,6 +35,14 @@
               ></template
             >
           </el-menu-item>
+          <el-menu-item index="/home">
+            <el-icon><document /></el-icon>
+            <template #title
+              ><router-link to="/home"
+                >返回首页</router-link
+              ></template
+            >
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-container>

@@ -7,12 +7,10 @@
         placeholder="请输入检索条件"
         :prefix-icon="Search"
       />
-      <el-button type="primary" @click="gainCoursers(1, 10, courseCondation)"
+      <el-button type="primary" @click="gainCoursers(1, 5, courseCondation)"
         >搜索</el-button
       >
-      <el-button type="success" @click="gainCoursers(1, 10, '')"
-        >重置</el-button
-      >
+      <el-button type="success" @click="gainCoursers(1, 5, '')">重置</el-button>
       <el-button type="info" @click="addCourseModel = true">添加</el-button>
       <el-button type="warning" @click="manageType = true">类型</el-button>
     </div>
@@ -149,10 +147,10 @@
     <el-dialog v-model="lookCourseModel" title="课程信息" width="440px">
       <el-form :model="courseInfo">
         <el-form-item label="课程名称" :label-width="formLabelWidth">
-          <el-input :value="courseInfo.courseTitle" :disabled="true" />
+          <el-input v-model="courseInfo.courseTitle" />
         </el-form-item>
         <el-form-item label="课程简介" :label-width="formLabelWidth">
-          <el-input :value="courseInfo.courseIntroduction" :disabled="true" />
+          <el-input v-model="courseInfo.courseIntroduction" type="textarea" />
         </el-form-item>
         <el-form-item label="课程讲师" :label-width="formLabelWidth">
           <el-input :value="courseInfo.lecturerName" :disabled="true" />
@@ -173,6 +171,7 @@
       </el-form>
       <template #footer>
         <span class="dialog-footer">
+          <el-button type="primary" @click="editInfo">修改</el-button>
           <el-button @click="lookCourseModel = false">关闭</el-button>
         </span>
       </template>
@@ -272,10 +271,11 @@ import {
   selectLecturerByPage,
   viewByPage,
   deleteCourse,
+  updateCourse,
 } from "@/api/manage";
 let courseCondation = ref("");
 let currentPages = ref(1);
-let pageSizes = ref(10);
+let pageSizes = ref(5);
 let totals = ref(0);
 let deleteCourseId = ref(0);
 let courseInfo = ref({
@@ -334,7 +334,7 @@ const tagTypes = ["success", "info", "warning", "danger", ""];
 onMounted(() => {
   gainTypes();
   selectLecturerAll(1, 1000, "");
-  gainCoursers(1, 10, "");
+  gainCoursers(1, 5, "");
 });
 
 //课程-------------------------------------
@@ -401,10 +401,16 @@ const subminCourse = () => {
   };
   insertCourse(data, formdata)
     .then((res: any) => {
-      console.log("添加课程", res);
       if (res.code == 20000) {
-        gainCoursers(1, 10, "");
+        gainCoursers(1, 5, "");
         ElMessage.success("添加成功");
+        let obj = {
+          courseId: res.data,
+          typeId: courseTypeId.value,
+        };
+        insertCourseType(obj).then((res) => {
+          console.log("添加课程类型", res);
+        });
       } else {
         ElMessage.error("添加失败");
       }
@@ -460,6 +466,32 @@ const deleteSure = () => {
 const lookOpen = (row: any) => {
   courseInfo.value = row;
   lookCourseModel.value = true;
+};
+//修改课程
+const editInfo = () => {
+  let data = {
+    courseId: courseInfo.value.courseId,
+    courseIntroduction: courseInfo.value.courseIntroduction,
+    courseTitle: courseInfo.value.courseTitle,
+  };
+  updateCourse(data)
+    .then((res: any) => {
+      console.log("修改课程信息", res);
+      if (res.code == 20000) {
+        gainCoursers(
+          currentPages.value,
+          pageSizes.value,
+          courseCondation.value
+        );
+        ElMessage.success("修改成功");
+        lookCourseModel.value = false;
+      } else {
+        ElMessage.error("修改失败");
+      }
+    })
+    .catch((error) => {
+      ElMessage.error("修改失败");
+    });
 };
 
 //类型----------------------------------
@@ -604,6 +636,12 @@ watch(firstTypeId, (newValue, oldValue) => {
     width: 300px;
   }
 }
+.el-input {
+  width: 300px;
+}
+.el-textarea {
+  width: 300px;
+}
 .el-pagination {
   margin-top: 26px;
   .demo-pagination-block + .demo-pagination-block {
@@ -623,6 +661,9 @@ watch(firstTypeId, (newValue, oldValue) => {
 }
 .el-button {
   margin-bottom: 10px;
+}
+:deep(.el-table td.el-table__cell div) {
+  white-space: nowrap;
 }
 .photos {
   list-style: none;

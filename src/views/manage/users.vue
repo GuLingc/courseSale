@@ -7,8 +7,10 @@
         placeholder="请输入检索条件"
         :prefix-icon="Search"
       />
-      <el-button type="primary" @click="selectUser(1, 10,userCondation)">搜索</el-button>
-      <el-button type="success" @click="selectUser(1, 10)">重置</el-button>
+      <el-button type="primary" @click="selectUser(1, 5, userCondation)"
+        >搜索</el-button
+      >
+      <el-button type="success" @click="selectUser(1, 5)">重置</el-button>
     </div>
     <el-table
       :data="tableData"
@@ -81,13 +83,13 @@
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
 import { onMounted, ref } from "vue";
-import { selectUsers, information } from "@/api/manage";
+import { selectUsers, information, deleteUser } from "@/api/manage";
 import { ElMessage } from "element-plus";
 let loading = ref(false);
 let userInfoShow = ref(false);
 let deleteConfrom = ref(false);
 let currentPages = ref(1);
-let pagesSize = ref(10);
+let pagesSize = ref(5);
 let userCondation = ref("");
 let total = ref(0);
 let deleteUserId = ref(0);
@@ -109,7 +111,7 @@ let signleInfo = ref({
 });
 let formLabelWidth = "90px";
 onMounted(() => {
-  selectUser(1, 10);
+  selectUser(1, 5);
 });
 function selectUser(aidPage: number, aidSize: number, selectContent?: string) {
   loading.value = true;
@@ -153,6 +155,22 @@ const handleShut = (row: any) => {
   deleteConfrom.value = true;
 };
 const shutSure = () => {
+  let data = {
+    userId: deleteUserId.value,
+  };
+  deleteUser(data)
+    .then((res: any) => {
+      if (res.code == 20000) {
+        selectUser(1, 5);
+        userCondation.value=""
+        ElMessage.success("删除成功");
+      } else {
+        ElMessage.error("删除失败");
+      }
+    })
+    .catch((error) => {
+      ElMessage.error("删除失败");
+    });
   deleteConfrom.value = false;
 };
 </script>
@@ -186,5 +204,8 @@ const shutSure = () => {
       -webkit-text-fill-color: #606266;
     }
   }
+}
+:deep(.el-table td.el-table__cell div) {
+  white-space: nowrap;
 }
 </style>

@@ -33,12 +33,18 @@ const gainHot = () => {
     choice: 1,
   };
   viewByType(data).then((res) => {
-    let k = Math.ceil(res.data.length / 3);
-    let datas = res.data;
-    console.log(datas);
-    courseData.value[0] = datas.slice(0, k);
-    courseData.value[1] = datas.slice(k, k * 2);
-    courseData.value[2] = datas.slice(k * 2);
+    if (res.data.length >= 9) {
+      let datas = res.data;
+      courseData.value[0] = datas.slice(0, 3);
+      courseData.value[1] = datas.slice(3, 6);
+      courseData.value[2] = datas.slice(6, 9);
+    } else {
+      let k = Math.ceil(res.data.length / 3);
+      let datas = res.data;
+      courseData.value[0] = datas.slice(0, k);
+      courseData.value[1] = datas.slice(k, k * 2);
+      courseData.value[2] = datas.slice(k * 2);
+    }
   });
 };
 </script>

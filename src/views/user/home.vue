@@ -6,12 +6,22 @@
         <div class="detail">
           <div class="aboutUs"></div>
           <div class="title"><h2>金牌讲师</h2></div>
-          <p style="text-indent: 0em;font-size: 18px;">{{ firstTeacher.lecturerName }}</p>
+          <p style="text-indent: 0em; font-size: 18px">
+            {{ firstTeacher.lecturerName }}
+          </p>
           <p>
             {{ firstTeacher.lecturerIntroduction }}
           </p>
         </div>
-        <div class="lecturerHeader"  :style="{ backgroundImage: `url(${firstTeacher.lecturerPicture || 'https://26823097.s61i.faiusr.com/2/AD0IuZPlDBACGAAg26rrggYoo7eSzwEwgA84zAg.jpg'})` }"></div>
+        <div
+          class="lecturerHeader"
+          :style="{
+            backgroundImage: `url(${
+              firstTeacher.lecturerPicture ||
+              'https://26823097.s61i.faiusr.com/2/AD0IuZPlDBACGAAg26rrggYoo7eSzwEwgA84zAg.jpg'
+            })`,
+          }"
+        ></div>
       </div>
       <div class="courseTeacher">
         <div
@@ -60,19 +70,33 @@
 import Recommend from "@/components/recommend.vue";
 import NewCourse from "@/components/newCourse.vue";
 import HotTeacher from "@/components/hotTeacher.vue";
-import { hostLecturer } from "@/api/user";
+import { hostLecturer, information } from "@/api/user";
 import { onMounted, ref } from "vue";
-let firstTeacher = ref<any>({})
-let teachers = ref<any[]>([])
+let firstTeacher = ref<any>({});
+let teachers = ref<any[]>([]);
 onMounted(() => {
   hotTeacher();
+  getUserInfo();
 });
 const hotTeacher = () => {
   hostLecturer().then((res: any) => {
     console.log("金牌讲师", res);
-    firstTeacher.value = res.data[0]
-    teachers.value = res.data
+    firstTeacher.value = res.data[0];
+    teachers.value = res.data;
   });
+};
+const getUserInfo = () => {
+  let data = {
+    userId: window.localStorage.userId,
+  };
+  information(data)
+    .then((res: any) => {
+      console.log("获取用户信息", res.data);
+      window.localStorage.setItem("userInfo", res.data);
+    })
+    .catch((error) => {
+      console.log("获取用户信息失败");
+    });
 };
 </script>
 

@@ -1,92 +1,92 @@
 <template>
   <div class="books">
-    <LabelTypes />
-    <div class="selectCourse">
+    <div class="labels">
+      <ul>
+        <li v-for="(item, index) in labels" :key="index">
+          <div class="active">{{ item.typeName }}</div>
+          <div
+            :class="{ active: status === '全部' }"
+            @click="changeType('全部', 0)"
+          >
+            全部
+          </div>
+          <div
+            v-for="(child, o) in item.typeChildren"
+            :key="o"
+            :class="{ active: status === child.typeName }"
+            @click="changeType(child.typeName, child.typeId)"
+          >
+            {{ child.typeName }}
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="selectCourse" v-if="courseDatas">
       <el-card
         :body-style="{ padding: '0px' }"
         v-for="(course, o) in courseDatas"
         :key="o"
       >
         <div class="coverImg">
-          <img :src="course.photo" class="image" />
+          <img :src="course.coursePicture" class="image" />
         </div>
         <div style="padding: 0 14px 14px" class="cardBottom">
-          <span>{{ course.title }}</span>
-          <p>{{ course.level }}</p>
+          <span>{{ course.lecturerName }}</span>
+          <p>{{ course.courseTitle }}</p>
         </div>
       </el-card>
     </div>
+    <el-empty v-if="!courseDatas" :image-size="200" />
   </div>
 </template>
 
 <script setup lang="ts">
-import LabelTypes from "@/components/labelTypes.vue";
-import { ref, reactive } from "vue";
-const courseDatas = reactive([
-  {
-    id: 1,
-    title: "Mathematics",
-    level: "我是一个课程名字1111111111",
-    photo:
-      "https://img2.baidu.com/it/u=270029723,3225860608&fm=253&fmt=auto&app=138&f=JPEG?w=656&h=500",
-  },
-  {
-    id: 2,
-    title: "Physics",
-    level: "Advanced",
-    photo:
-      "https://img2.baidu.com/it/u=3653114115,3722914227&fm=253&fmt=auto&app=120&f=JPEG?w=396&h=500",
-  },
-  {
-    id: 3,
-    title: "Biology",
-    level: "Beginner",
-    photo:
-      "https://img1.baidu.com/it/u=4153583684,635587465&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889",
-  },
-  {
-    id: 1,
-    title: "Mathematics",
-    level: "我是一个课程名字1111111111",
-    photo:
-      "https://img2.baidu.com/it/u=270029723,3225860608&fm=253&fmt=auto&app=138&f=JPEG?w=656&h=500",
-  },
-  {
-    id: 2,
-    title: "Physics",
-    level: "Advanced",
-    photo:
-      "https://img2.baidu.com/it/u=3653114115,3722914227&fm=253&fmt=auto&app=120&f=JPEG?w=396&h=500",
-  },
-  {
-    id: 3,
-    title: "Biology",
-    level: "Beginner",
-    photo:
-      "https://img1.baidu.com/it/u=4153583684,635587465&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889",
-  },
-  {
-    id: 1,
-    title: "Mathematics",
-    level: "我是一个课程名字1111111111",
-    photo:
-      "https://img2.baidu.com/it/u=270029723,3225860608&fm=253&fmt=auto&app=138&f=JPEG?w=656&h=500",
-  },
-  {
-    id: 2,
-    title: "Physics",
-    level: "Advanced",
-    photo:
-      "https://img2.baidu.com/it/u=3653114115,3722914227&fm=253&fmt=auto&app=120&f=JPEG?w=396&h=500",
-  },
-  {
-    id: 3,
-    title: "Biology",
-    level: "Beginner",
-    photo:
-      "https://img1.baidu.com/it/u=4153583684,635587465&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889",
-  },
-]);
+import { ElMessage } from "element-plus";
+import { onMounted, ref } from "vue";
+import { viewByType } from "@/api/user";
+import { selectAll } from "@/api/manage";
+const courseDatas = ref<any[]>([]);
+let status = ref("全部");
+let labels = ref<any[]>([]);
+onMounted(() => {
+  gainHot(0);
+  gainTypes();
+});
+//获取类型
+const gainTypes = () => {
+  selectAll()
+    .then((res) => {
+      console.log("获取全部类型", res);
+      labels.value = res.data;
+    })
+    .catch((error) => {
+      ElMessage.error("获取类型失败");
+    });
+};
+//获取课程
+const gainHot = (typeId: number) => {
+  let data;
+  if (typeId == 0) {
+    data = {
+      choice: 1,
+    };
+  } else {
+    data = {
+      choice: 1,
+      typeId,
+    };
+  }
+  viewByType(data).then((res) => {
+    console.log("获取课程信息", res);
+
+    courseDatas.value = res.data;
+  });
+};
+//改变搜索的课程类型
+const changeType = (typeName: string, typeId: number) => {
+  status.value = typeName;
+  gainHot(typeId);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -97,7 +97,6 @@ const courseDatas = reactive([
 }
 .selectCourse {
   display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
   margin-top: 30px;
   .el-card {
@@ -106,6 +105,7 @@ const courseDatas = reactive([
     background-color: transparent;
     border: none;
     margin-bottom: 15px;
+    margin-right: 20px;
     .coverImg {
       width: 100%;
       height: 200px;
@@ -123,11 +123,12 @@ const courseDatas = reactive([
     }
     .cardBottom {
       position: relative;
-      color: white;
       text-align: center;
       transition: all 0.5s;
       margin-left: 15px;
       margin-right: 15px;
+      font-size: 14px;
+      color: #e1e2e4;
       z-index: 5;
       p {
         font-size: 16px;
@@ -141,6 +142,22 @@ const courseDatas = reactive([
       span:hover {
         cursor: pointer;
       }
+    }
+  }
+}
+
+.labels {
+  color: white;
+  li {
+    display: flex;
+    div {
+      margin-left: 20px;
+    }
+    div:hover {
+      cursor: pointer;
+    }
+    .active {
+      color: rgb(217 185 255);
     }
   }
 }

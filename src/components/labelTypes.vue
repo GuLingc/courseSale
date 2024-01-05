@@ -17,30 +17,24 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { selectAll } from "@/api/manage";
+import { ElMessage } from "element-plus";
 let status = "不限";
-let labels = [
-  {
-    typeId: 1,
-    typeName: "测试",
-    typeChildren: [
-      {
-        typeId: 2,
-        typeName: "测试2",
-        typeChildren: null,
-      },
-      {
-        typeId: 3,
-        typeName: "测试3",
-        typeChildren: null,
-      },
-    ],
-  },
-  {
-    typeId: 4,
-    typeName: "测试4",
-    typeChildren: [],
-  },
-];
+let labels = ref<any[]>([]);
+onMounted(() => {
+  gainTypes();
+});
+const gainTypes = () => {
+  selectAll()
+    .then((res) => {
+      console.log("获取全部类型", res);
+      labels.value = res.data;
+    })
+    .catch((error) => {
+      ElMessage.error("获取类型失败");
+    });
+};
 </script>
 
 <style lang="scss" scoped>

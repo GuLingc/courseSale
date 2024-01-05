@@ -2,7 +2,6 @@
 import AppHeader from "@/components/appHeader.vue";
 import AppFooter from "@/components/appFooter.vue";
 </script>
-
 <template>
   <AppHeader></AppHeader>
   <router-view></router-view>
