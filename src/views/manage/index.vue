@@ -62,9 +62,9 @@
             <el-avatar
               :size="32"
               class="mr-3"
-              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+              :src="userInfo.userPicture"
             />
-            <span class="text-large font-600 mr-3"> Title </span>
+            <span class="text-large font-600 mr-3" style="font-size:15px"> {{ userInfo.username }} </span>
           </div>
         </el-header>
         <el-main>
@@ -89,6 +89,7 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 let isCollapse = ref(false);
 let defaultRoute = ref("");
+let userInfo = JSON.parse(window.localStorage.getItem("userInfo"))
 
 onMounted(() => {
   defaultRoute.value = route.path;
@@ -96,6 +97,7 @@ onMounted(() => {
 const handleFold = () => {
   isCollapse.value = !isCollapse.value;
 };
+
 </script>
 
 <style lang="scss" scoped>

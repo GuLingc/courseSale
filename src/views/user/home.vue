@@ -91,8 +91,7 @@ const getUserInfo = () => {
   };
   information(data)
     .then((res: any) => {
-      console.log("获取用户信息", res.data);
-      window.localStorage.setItem("userInfo", res.data);
+      window.localStorage.setItem("userInfo", JSON.stringify(res.data));
     })
     .catch((error) => {
       console.log("获取用户信息失败");

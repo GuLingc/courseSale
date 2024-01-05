@@ -3,17 +3,17 @@
     <div class="bookNav">
       <div class="storeName">智慧星球</div>
       <ul>
-        <li :class="{ active: clickNav === 1 }" @click="clickNav = 1">
+        <li :class="{ active: clickNav === '/home' }" @click="clickNav = 1">
           <router-link to="/home">首页</router-link>
         </li>
-        <li :class="{ active: clickNav === 2 }" @click="clickNav = 2">
+        <li :class="{ active: clickNav === '/course' }" @click="clickNav = 2">
           <router-link to="/course">课程展示</router-link>
         </li>
-        <li :class="{ active: clickNav === 3 }" @click="clickNav = 3">
+        <li v-if="userInfo.authority == 1" :class="{ active: clickNav === '/manage/users' }" @click="clickNav = 3">
           <router-link to="/manage/users">进入后台</router-link>
         </li>
-        <li :class="{ active: clickNav === 4 }" @click="clickNav = 4">
-          <span v-if="userId != 0">退出登录</span>
+        <li :class="{ active: clickNav === '/login' }" @click="clickNav = 4">
+          <span v-if="userId != 0" ><router-link to="/login">退出登录</router-link></span>
           <router-link v-else to="/login">登录</router-link>
         </li>
       </ul>
@@ -23,8 +23,11 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
-const clickNav = ref(1);
+import {useRoute} from "vue-router"
+const route = useRoute()
+const clickNav = ref(route.path);
 let headertype = ref("transparent");
+let userInfo = JSON.parse(window.localStorage.getItem("userInfo"))
 let userId = window.localStorage.userId
 onMounted(() => {
   document.addEventListener("scroll", handlerscroll);
