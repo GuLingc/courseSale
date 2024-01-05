@@ -89,7 +89,7 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 let isCollapse = ref(false);
 let defaultRoute = ref("");
-let userInfo = JSON.parse(window.localStorage.getItem("userInfo"))
+let userInfo = JSON.parse(window.localStorage.getItem("userInfo")||'')
 
 onMounted(() => {
   defaultRoute.value = route.path;

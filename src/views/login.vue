@@ -35,7 +35,11 @@
               <el-input placeholder="请输入账户" v-model="userinfo.account" />
             </el-form-item>
             <el-form-item label="密码" v-if="!emailShow" prop="password">
-              <el-input placeholder="请输入密码" v-model="userinfo.password" />
+              <el-input
+                type="password"
+                placeholder="请输入密码"
+                v-model="userinfo.password"
+              />
             </el-form-item>
             <el-form-item
               label="邮箱"
@@ -74,16 +78,21 @@
         </div>
       </div>
     </div>
-    <el-dialog title="忘记密码" v-model="seedialogVisible" width="30%">
-      <el-form ref="userInfos" :model="userinfo" label-width="80px">
+    <el-dialog
+      title="忘记密码"
+      v-model="seedialogVisible"
+      width="30%"
+      :before-close="closeRest"
+    >
+      <el-form ref="userInfos" :model="restUserinfo" label-width="80px">
         <el-form-item label="邮箱">
-          <el-input v-model="userinfo.email"></el-input>
+          <el-input v-model="restUserinfo.email"></el-input>
         </el-form-item>
         <el-form-item label="验证码">
-          <el-input v-model="userinfo.code"> </el-input>
+          <el-input v-model="restUserinfo.code"> </el-input>
         </el-form-item>
         <el-form-item label="新密码">
-          <el-input type="password" v-model="userinfo.newpassword"></el-input>
+          <el-input type="password" v-model="restUserinfo.password"></el-input>
         </el-form-item>
       </el-form>
       <div
@@ -91,13 +100,10 @@
         class="dialog-footer"
         style="display: flex; justify-content: center"
       >
-        <el-button
-          type="success"
-          :disabled="sendSuccess"
-          @click="sendCode"
-          >{{ sendSuccess ? sendNum + "s后重新发送" : "发送验证码" }}</el-button
-        >
-        <el-button type="primary">重置</el-button>
+        <el-button type="success" :disabled="sendRest" @click="restCode">{{
+          sendRest ? sendNum + "s后重新发送" : "发送验证码"
+        }}</el-button>
+        <el-button type="primary" @click="restPassword">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -107,7 +113,14 @@
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import Register from "@/components/register.vue";
-import { sendEmail, userRegister, accountLogin, emailLogin } from "@/api/user";
+import {
+  sendEmail,
+  userRegister,
+  accountLogin,
+  emailLogin,
+  forgetPassword,
+  information,
+} from "@/api/user";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 const router = useRouter();
 let lefts = ref(20);
@@ -126,7 +139,13 @@ let userinfo = ref<infoType>({
   code: "",
   newpassword: "",
 });
+let restUserinfo = ref({
+  password: "",
+  email: "",
+  code: "",
+});
 let sendNum = ref(60);
+let sendRest = ref(false);
 let sendSuccess = ref(false);
 let loginShow = ref(true);
 let emailShow = ref(false);
@@ -208,6 +227,19 @@ const submitForm = async (formEl: FormInstance | undefined) => {
                 userinfo.value.password = "";
                 window.localStorage.setItem("userId", res.data.userId);
                 window.localStorage.setItem("authority", res.data.authority);
+                let obj = {
+                  userId: res.data.userId,
+                };
+                information(obj)
+                  .then((res: any) => {
+                    window.localStorage.setItem(
+                      "userInfo",
+                      JSON.stringify(res.data)
+                    );
+                  })
+                  .catch((error) => {
+                    console.log("获取用户信息失败");
+                  });
                 router.push("/home");
               } else {
                 ElMessage.error("登录失败");
@@ -230,6 +262,19 @@ const submitForm = async (formEl: FormInstance | undefined) => {
                 userinfo.value.password = "";
                 window.localStorage.setItem("userId", res.data.userId);
                 window.localStorage.setItem("authority", res.data.authority);
+                let obj = {
+                  userId: res.data.userId,
+                };
+                information(obj)
+                  .then((res: any) => {
+                    window.localStorage.setItem(
+                      "userInfo",
+                      JSON.stringify(res.data)
+                    );
+                  })
+                  .catch((error) => {
+                    console.log("获取用户信息失败");
+                  });
                 router.push("/home");
               } else {
                 ElMessage.error("登录失败");
@@ -267,6 +312,86 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       ElMessage.warning("请完善信息");
     }
   });
+};
+
+//重置密码
+//发送验证码
+const restCode = () => {
+  const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
+  if (regEmail.test(restUserinfo.value.email)) {
+    let data = {
+      email: restUserinfo.value.email,
+      operate: "forget",
+    };
+    sendEmail(data)
+      .then((res: any) => {
+        if (res.code == 20000) {
+          ElMessage.success("已发送验证码");
+        }
+        sendRest.value = true;
+        sendNum.value = 60;
+        const timer = setInterval(() => {
+          sendNum.value = sendNum.value - 1;
+          if (sendNum.value == 0) {
+            sendRest.value = false;
+            clearInterval(timer);
+          }
+        }, 1000);
+      })
+      .catch((error) => {
+        ElMessage.error("发送验证码失败");
+      });
+  } else {
+    ElMessage.warning("请输入正确的邮箱号");
+  }
+};
+//修改密码
+const restPassword = () => {
+  const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
+  const regPassword = /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,10}$/;
+  if (regEmail.test(restUserinfo.value.email)) {
+    if (regPassword.test(restUserinfo.value.password)) {
+      if (restUserinfo.value.code.trim()) {
+        let data = {
+          code: restUserinfo.value.code,
+          email: restUserinfo.value.email,
+          newPassword: restUserinfo.value.password,
+        };
+        forgetPassword(data)
+          .then((res: any) => {
+            console.log("重置密码", res);
+
+            if (res.code == 20000) {
+              ElMessage.success("密码重置成功");
+              restUserinfo.value.code = "";
+              restUserinfo.value.email = "";
+              restUserinfo.value.password = "";
+              seedialogVisible.value = false;
+            } else {
+              ElMessage.error("密码重置失败");
+            }
+          })
+          .catch((error) => {
+            ElMessage.error("密码重置失败");
+          });
+      } else {
+        ElMessage.warning("验证码不能为空");
+      }
+    } else {
+      ElMessage.warning(
+        "密码必须由6-10位的字母和数字组成,且至少包含一个字母和一个数字"
+      );
+    }
+  } else {
+    ElMessage.warning("邮箱号不正确");
+  }
+};
+//关闭弹窗
+const closeRest = () => {
+  restUserinfo.value.code = "";
+  restUserinfo.value.email = "";
+  restUserinfo.value.password = "";
+  seedialogVisible.value = false;
 };
 </script>
 

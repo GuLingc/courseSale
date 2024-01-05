@@ -10,8 +10,8 @@
         :body-style="{ padding: '0px' }"
         v-for="(course, o) in item"
         :key="o"
-      >
-        <img :src="course.coursePicture" class="image" />
+        @click="goBack(course.courseId)"
+        ><img :src="course.coursePicture" class="image" />
         <div style="padding: 14px">
           <span>{{ course.lecturerName }}</span>
           <p>{{ course.courseTitle }}</p>
@@ -23,27 +23,34 @@
 
 <script setup lang="ts">
 import { viewByType } from "@/api/user";
+import {useRouter} from "vue-router"
 import { onMounted, ref } from "vue";
 let courseData = ref<any[]>([[], [], []]);
 onMounted(() => {
   gainHot();
 });
+let router = useRouter()
+let goBack=(id:number)=>{
+  router.push({path:'/single',query:{courseId:id}})
+}
 const gainHot = () => {
   let data = {
     choice: 1,
   };
   viewByType(data).then((res) => {
-    if (res.data.length >= 9) {
-      let datas = res.data;
-      courseData.value[0] = datas.slice(0, 3);
-      courseData.value[1] = datas.slice(3, 6);
-      courseData.value[2] = datas.slice(6, 9);
-    } else {
-      let k = Math.ceil(res.data.length / 3);
-      let datas = res.data;
-      courseData.value[0] = datas.slice(0, k);
-      courseData.value[1] = datas.slice(k, k * 2);
-      courseData.value[2] = datas.slice(k * 2);
+    if (res.data) {
+      if (res.data.length >= 9) {
+        let datas = res.data;
+        courseData.value[0] = datas.slice(0, 3);
+        courseData.value[1] = datas.slice(3, 6);
+        courseData.value[2] = datas.slice(6, 9);
+      } else {
+        let k = Math.ceil(res.data.length / 3);
+        let datas = res.data;
+        courseData.value[0] = datas.slice(0, k);
+        courseData.value[1] = datas.slice(k, k * 2);
+        courseData.value[2] = datas.slice(k * 2);
+      }
     }
   });
 };

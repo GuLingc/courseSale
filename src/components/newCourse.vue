@@ -6,6 +6,7 @@
       :key="o"
       @mouseleave="handleMouse(o)"
       @mouseenter="handleMouse(o)"
+      @click="goBack(course.courseId)"
     >
       <img :src="course.coursePicture" class="image" />
       <div style="padding: 14px" class="cardBottom">
@@ -19,10 +20,15 @@
 <script setup lang="ts">
 import { viewByType } from "@/api/user";
 import { ref, onMounted } from "vue";
+import {useRouter} from "vue-router"
 const courseDatas = ref<any[]>([]);
 onMounted(() => {
   gainHot();
 });
+let router = useRouter()
+let goBack=(id:number)=>{
+  router.push({path:'/single',query:{courseId:id}})
+}
 const gainHot = () => {
   let data = {
     choice: 0,

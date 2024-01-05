@@ -1,38 +1,35 @@
 <template>
-  <div class="home">
-    <div class="bookCarousel">
-      <el-carousel height="400px">
-        <el-carousel-item v-for="item in photos" :key="item">
-          <img :src="item" alt="" />
-        </el-carousel-item>
-      </el-carousel>
-    </div>
-    <el-container>
-      <el-aside width="200px"><NovelGenre /></el-aside>
+  <div class="single" v-loading="loadings">
+    <el-container style="flex-direction: row-reverse">
+      <el-aside width="300px">
+        <h3 style="margin-bottom: 20px">相关推荐</h3>
+        <ul>
+          <li v-for="(item, index) in aboutCourse" :key="index">
+            <div class="courseCover" @click="goBack(item.courseId)">
+              <img :src="item.coursePicture" alt="" />
+            </div>
+            <div class="datas">
+              <p>{{ item.courseTitle }}</p>
+              <p>{{ item.lecturerName }}</p>
+            </div>
+          </li>
+        </ul>
+      </el-aside>
       <el-container>
+        <el-header>
+          <h3>{{ courseInfos.courseTitle }}</h3>
+          <p>
+            浏览量:{{ courseInfos.courseNum
+            }}<span>{{ courseInfos.courseTime }}</span>
+          </p>
+        </el-header>
         <el-main>
-          <div class="aboutUs">
-            <div class="title">
-              <span>关于我们</span>
-            </div>
-            <div class="storeDetail">
-              <div class="storePhotos">
-                <img src="@/assets/images/storeImg.png" alt="" />
-              </div>
-              <div class="storeText">
-                <h2>书店介绍</h2>
-                <p>
-                  引领阅读风尚，分享知识与文化我们的书店不仅销售书籍，更是分享知识与文化的平台。我们关注读者的需求和兴趣，定期举办各类阅读活动，引领阅读风尚，让阅读成为一种生活方式。
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="books">
-            <div class="title">
-              <span>图书展示</span>
-            </div>
-            <BookViewsVue />
-          </div>
+          <video :id="playerId" class="video-js">
+            <source
+              src="https://lmy-1311156074.cos.ap-nanjing.myqcloud.com/post/20240105224534_鱼香肉丝.mp4"
+              type="video/mp4"
+            />
+          </video>
         </el-main>
       </el-container>
     </el-container>
@@ -40,64 +37,126 @@
 </template>
 
 <script setup lang="ts">
-import AppHeader from "@/components/appHeader.vue";
-import NovelGenre from "@/components/novelGenre.vue";
-import BookViewsVue from "@/components/bookViews.vue";
-const photos = ["/src/assets/images/book.png", "/src/assets/images/store.jpg"];
+import { ElMessage } from "element-plus";
+import { onMounted, ref, watchEffect } from "vue";
+import { viewById, viewByLecturer, browse } from "@/api/user";
+import { useRouter, useRoute } from "vue-router";
+import videojs from "video.js";
+let courseInfos = ref<any>({});
+let aboutCourse = ref<any>({});
+let playerId = ref("myVideo");
+let loadings = ref(false);
+onMounted(() => {
+  loadings.value = true;
+  addViews();
+  singleCourse();
+  initVideo();
+});
+let router = useRouter();
+let route = useRoute();
+let courseId = ref(route.query.courseId);
+const addViews = () => {
+  let data = {
+    courseId: courseId.value,
+  };
+  browse(data).then((res) => {
+    console.log("浏览量", res);
+  });
+};
+let goBack = (id: number) => {
+  router.push({ path: "/single", query: { courseId: id } });
+};
+const initVideo = () => {
+  //初始化视频方法
+  let myPlayer = videojs(playerId.value, {
+    //确定播放器是否具有用户可以与之交互的控件。没有控件，启动视频播放的唯一方法是使用autoplay属性或通过Player API。
+    controls: true,
+    //自动播放属性,muted:静音播放
+    autoplay: "muted",
+    //建议浏览器是否应在<video>加载元素后立即开始下载视频数据。
+    preload: "auto",
+    //设置视频播放器的显示宽度（以像素为单位）
+    width: "800px",
+    //设置视频播放器的显示高度（以像素为单位）
+    height: "400px",
+  });
+  loadings.value = false;
+};
+const singleCourse = () => {
+  let data = {
+    courseId: courseId.value,
+  };
+  viewById(data)
+    .then((res: any) => {
+      if (res.code == 20000) {
+        courseInfos.value = res.data;
+        let obj = {
+          lecturerId: res.data.lecturerId,
+        };
+        viewByLecturer(obj).then((res) => {
+          console.log("相关课程", res.data);
+          aboutCourse.value = res.data;
+        });
+      } else {
+        ElMessage.error("获取课程信息失败");
+      }
+    })
+    .catch((error) => {
+      ElMessage.error("获取课程信息失败");
+    });
+};
 </script>
 
 <style lang="scss" scoped>
-.bookCarousel {
-  .el-carousel__item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.single {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 130px;
+  color: white;
+}
+.el-header {
+  color: #cdd2d7;
+  font-size: 16px;
+  p {
+    padding: 15px 0 20px 40px;
+  }
+  span {
+    margin-left: 30px;
   }
 }
-.el-container {
-  margin-top: 10px;
-}
-.el-main {
-  padding-top: 0px;
-  .title {
-    border-bottom: 1px rgb(151, 151, 151) solid;
-    span {
-      display: inline-block;
-      padding: 0px 10px 10px;
-      font-size: 18px;
-      border-bottom: 1px solid rgb(179, 106, 231);
-    }
-  }
-  .aboutUs {
-    .storeDetail {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      margin-top: 20px;
-      padding-left: 15px;
-      .storePhotos {
-        width: 350px;
-        height: 100%;
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
+ul {
+  li {
+    width: 300px;
+    overflow: hidden;
+    height: 180px;
+    display: flex;
+    justify-content: space-between;
+    .courseCover {
+      width: 150px;
+      height: 180px;
+      margin: 0 auto;
+      overflow: hidden;
+      img {
+        width: 150px;
+        height: 140px;
+        object-fit: cover;
       }
-      .storeText {
-        flex: 1;
-        padding: 25px 30px;
-        p {
-          min-width: 200px;
-          margin-top: 30px;
-          text-indent: 2rem;
-          white-space: pre-line;
-        }
+    }
+    .datas {
+      flex: 1;
+      font-size: 15px;
+      margin-left: 8px;
+      overflow: hidden;
+      p {
+        margin-bottom: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }
-  .books {
-    margin-top: 20px;
+  li:hover {
+    cursor: pointer;
   }
 }
 </style>

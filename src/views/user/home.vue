@@ -70,13 +70,13 @@
 import Recommend from "@/components/recommend.vue";
 import NewCourse from "@/components/newCourse.vue";
 import HotTeacher from "@/components/hotTeacher.vue";
-import { hostLecturer, information } from "@/api/user";
+import { hostLecturer } from "@/api/user";
 import { onMounted, ref } from "vue";
 let firstTeacher = ref<any>({});
 let teachers = ref<any[]>([]);
+  let userInfo = JSON.parse(window.localStorage.getItem("userInfo")||"")
 onMounted(() => {
   hotTeacher();
-  getUserInfo();
 });
 const hotTeacher = () => {
   hostLecturer().then((res: any) => {
@@ -84,18 +84,6 @@ const hotTeacher = () => {
     firstTeacher.value = res.data[0];
     teachers.value = res.data;
   });
-};
-const getUserInfo = () => {
-  let data = {
-    userId: window.localStorage.userId,
-  };
-  information(data)
-    .then((res: any) => {
-      window.localStorage.setItem("userInfo", JSON.stringify(res.data));
-    })
-    .catch((error) => {
-      console.log("获取用户信息失败");
-    });
 };
 </script>
 
