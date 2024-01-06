@@ -30,20 +30,26 @@ export const userRegister = async (data: any) =>
     method: "POST",
     params: data,
   });
-  //忘记密码
-  export const forgetPassword = async (data: any) =>
+//忘记密码
+export const forgetPassword = async (data: any) =>
   requests({
     url: "/user/forgetPassword",
     method: "PUT",
     params: data,
   });
 
-
 //查看用户信息
 export const information = async (data: any) =>
   requests({
     url: "/user/information",
     method: "GET",
+    params: data,
+  });
+//修改用户信息
+export const updateSelf = async (data: any) =>
+  requests({
+    url: "/user/updateSelf",
+    method: "PUT",
     params: data,
   });
 
@@ -61,24 +67,24 @@ export const viewByType = async (data: any) =>
     method: "GET",
     params: data,
   });
-  //通过id查看课程
-  export const viewById = async (data: any) =>
+//通过id查看课程
+export const viewById = async (data: any) =>
   requests({
     url: "/course/viewById",
     method: "GET",
     params: data,
   });
-  //查看老师的所有课程
-  export const viewByLecturer= async (data: any) =>
+//查看老师的所有课程
+export const viewByLecturer = async (data: any) =>
   requests({
     url: "/course/viewByLecturer",
     method: "GET",
     params: data,
   });
-    //增加浏览量
-    export const browse= async (data: any) =>
-    requests({
-      url: "/course/browse",
-      method: "PUT",
-      params: data,
-    });
+//增加浏览量
+export const browse = async (data: any) =>
+  requests({
+    url: "/course/browse",
+    method: "PUT",
+    params: data,
+  });

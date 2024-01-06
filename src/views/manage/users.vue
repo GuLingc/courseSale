@@ -58,6 +58,9 @@
         <el-form-item label="电话" :label-width="formLabelWidth">
           <el-input v-bind:value="signleInfo.phone" disabled />
         </el-form-item>
+        <el-form-item label="简介" :label-width="formLabelWidth">
+          <el-input type="textarea" v-bind:value="signleInfo.introduction" disabled />
+        </el-form-item>
         <el-form-item label="注册时间" :label-width="formLabelWidth">
           <el-input v-bind:value="signleInfo.registerTime" disabled />
         </el-form-item>

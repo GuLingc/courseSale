@@ -26,6 +26,7 @@
         :body-style="{ padding: '0px' }"
         v-for="(course, o) in courseDatas"
         :key="o"
+        @click="goBack(course.courseId)"
       >
         <div class="coverImg">
           <img :src="course.coursePicture" class="image" />
@@ -45,6 +46,7 @@ import { ElMessage } from "element-plus";
 import { onMounted, ref } from "vue";
 import { viewByType } from "@/api/user";
 import { selectAll } from "@/api/manage";
+import {useRouter} from "vue-router"
 const courseDatas = ref<any[]>([]);
 let status = ref("全部");
 let labels = ref<any[]>([]);
@@ -52,6 +54,10 @@ onMounted(() => {
   gainHot(0);
   gainTypes();
 });
+let router = useRouter()
+let goBack=(id:number)=>{
+  router.push({path:'/single',query:{courseId:id}})
+}
 //获取类型
 const gainTypes = () => {
   selectAll()

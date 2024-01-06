@@ -25,10 +25,7 @@
         </el-header>
         <el-main>
           <video :id="playerId" class="video-js">
-            <source
-              src="https://lmy-1311156074.cos.ap-nanjing.myqcloud.com/post/20240105224534_鱼香肉丝.mp4"
-              type="video/mp4"
-            />
+            <source :src="courseInfos.courseVideo" type="video/mp4" />
           </video>
         </el-main>
       </el-container>
@@ -38,7 +35,7 @@
 
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, ref, watch, watchEffect } from "vue";
 import { viewById, viewByLecturer, browse } from "@/api/user";
 import { useRouter, useRoute } from "vue-router";
 import videojs from "video.js";
@@ -46,11 +43,17 @@ let courseInfos = ref<any>({});
 let aboutCourse = ref<any>({});
 let playerId = ref("myVideo");
 let loadings = ref(false);
+const shouldRefresh = ref(true);
 onMounted(() => {
-  loadings.value = true;
+  singleCourse().then(() => {
+    setTimeout(() => {
+      initVideo();
+    }, 100);
+  });
   addViews();
-  singleCourse();
-  initVideo();
+  setTimeout(() => {
+    shouldRefresh.value = false;
+  }, 100);
 });
 let router = useRouter();
 let route = useRoute();
@@ -67,22 +70,25 @@ let goBack = (id: number) => {
   router.push({ path: "/single", query: { courseId: id } });
 };
 const initVideo = () => {
-  //初始化视频方法
-  let myPlayer = videojs(playerId.value, {
-    //确定播放器是否具有用户可以与之交互的控件。没有控件，启动视频播放的唯一方法是使用autoplay属性或通过Player API。
-    controls: true,
-    //自动播放属性,muted:静音播放
-    autoplay: "muted",
-    //建议浏览器是否应在<video>加载元素后立即开始下载视频数据。
-    preload: "auto",
-    //设置视频播放器的显示宽度（以像素为单位）
-    width: "800px",
-    //设置视频播放器的显示高度（以像素为单位）
-    height: "400px",
-  });
-  loadings.value = false;
+  console.log(courseInfos.value.courseVideo);
+  if (courseInfos.value.courseVideo) {
+    //初始化视频方法
+    let myPlayer = videojs(playerId.value, {
+      //确定播放器是否具有用户可以与之交互的控件。没有控件，启动视频播放的唯一方法是使用autoplay属性或通过Player API。
+      controls: true,
+      //自动播放属性,muted:静音播放
+      autoplay: "muted",
+      //建议浏览器是否应在<video>加载元素后立即开始下载视频数据。
+      preload: "auto",
+      //设置视频播放器的显示宽度（以像素为单位）
+      width: "800px",
+      //设置视频播放器的显示高度（以像素为单位）
+      height: "400px",
+    });
+  }
 };
-const singleCourse = () => {
+
+const singleCourse = async () => {
   let data = {
     courseId: courseId.value,
   };
@@ -105,6 +111,14 @@ const singleCourse = () => {
       ElMessage.error("获取课程信息失败");
     });
 };
+watch(shouldRefresh, (newVal) => {
+  console.log(11111111111111111);
+  
+  if (newVal) {
+    // 执行刷新操作
+    window.location.reload();
+  }
+});
 </script>
 
 <style lang="scss" scoped>
